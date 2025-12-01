@@ -36,8 +36,8 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({ onExtract, onLucky, 
   };
 
   const handleLuckyClick = () => {
-    if (!input.trim()) return;
-    onLucky(input);
+    // We allow empty input for "I'm Feeling Lucky" to trigger the cat gif
+    onLucky(input.trim());
   };
 
   return (
@@ -48,7 +48,7 @@ export const UrlInputForm: React.FC<UrlInputFormProps> = ({ onExtract, onLucky, 
         onChange={(e) => setInput(e.target.value)}
         placeholder="Enter a URL or type ingredients (e.g., 'chicken, rice')..."
         className="w-full px-4 py-3 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-500 text-slate-900 dark:text-white"
-        required
+        required={false}
         disabled={isLoading}
       />
       <div className="flex flex-col sm:flex-row gap-3">

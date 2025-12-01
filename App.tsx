@@ -16,6 +16,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [viewingRecipe, setViewingRecipe] = useState<Recipe | null>(null);
+  const [showCatGif, setShowCatGif] = useState<boolean>(false);
 
   const handleExtractRecipe = useCallback(async (url: string) => {
     if (!url) {
@@ -25,6 +26,7 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setCurrentRecipe(null);
+    setShowCatGif(false);
 
     try {
       const recipe = await extractRecipeFromUrl(url);
@@ -38,13 +40,19 @@ const App: React.FC = () => {
   }, []);
 
   const handleLuckySearch = useCallback(async (query: string) => {
+    // If the user clicks "I'm Feeling Lucky" without input, show the cat GIF
     if (!query) {
-      setError('Please enter some ingredients or a food name.');
+      setShowCatGif(true);
+      setCurrentRecipe(null);
+      setError(null);
+      setIsLoading(false);
       return;
     }
+
     setIsLoading(true);
     setError(null);
     setCurrentRecipe(null);
+    setShowCatGif(false);
 
     try {
       const recipe = await findRecipe(query);
@@ -101,6 +109,21 @@ const App: React.FC = () => {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 dark:border-violet-400"></div>
               <p className="mt-4 text-slate-600 dark:text-slate-400">Cooking up some magic, please wait...</p>
             </div>
+          )}
+
+          {showCatGif && !isLoading && !currentRecipe && (
+             <div className="mt-10 flex flex-col items-center justify-center animate-fade-in text-center">
+               <div className="rounded-xl overflow-hidden shadow-xl">
+                 <img 
+                   src="https://media.giphy.com/media/mlvseq9yvZhba/giphy.gif" 
+                   alt="Cute cat" 
+                   className="w-full max-w-sm h-auto"
+                 />
+               </div>
+               <p className="mt-6 text-xl font-medium text-slate-700 dark:text-slate-300">
+                 You didn't ask for anything...<br />so here is a cute cat instead! 🐱
+               </p>
+             </div>
           )}
 
           {currentRecipe && !isLoading && (
