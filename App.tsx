@@ -1,8 +1,7 @@
-
 import React, { useState, useCallback } from 'react';
 import { type Recipe } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { extractRecipeFromUrl } from './services/geminiService';
+import { extractRecipeFromUrl, findRecipe } from './services/geminiService';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { UrlInputForm } from './components/UrlInputForm';
@@ -30,9 +29,29 @@ const App: React.FC = () => {
     try {
       const recipe = await extractRecipeFromUrl(url);
       setCurrentRecipe({ ...recipe, id: Date.now().toString() });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      setError('Failed to extract recipe. The URL might be invalid, or the page may not contain a recipe. Please try another one.');
+      setError(e.message || 'Failed to extract recipe. The URL might be invalid, or the page may not contain a recipe.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const handleLuckySearch = useCallback(async (query: string) => {
+    if (!query) {
+      setError('Please enter some ingredients or a food name.');
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    setCurrentRecipe(null);
+
+    try {
+      const recipe = await findRecipe(query);
+      setCurrentRecipe({ ...recipe, id: Date.now().toString() });
+    } catch (e: any) {
+      console.error(e);
+      setError(e.message || 'Failed to find a recipe. Please try being more specific with your ingredients or request.');
     } finally {
       setIsLoading(false);
     }
@@ -61,14 +80,18 @@ const App: React.FC = () => {
               <ChefHat className="h-10 w-10 text-violet-600 dark:text-violet-400" />
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">Be the Masterchef</h1>
-            <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">What do you want to cook?</p>
+            <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">What do you want to cook today?</p>
           </section>
 
-          <UrlInputForm onExtract={handleExtractRecipe} isLoading={isLoading} />
+          <UrlInputForm 
+            onExtract={handleExtractRecipe} 
+            onLucky={handleLuckySearch}
+            isLoading={isLoading} 
+          />
 
           {error && (
-            <div className="mt-6 flex items-center justify-center gap-3 text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/50 p-4 rounded-lg">
-              <AlertTriangle className="h-5 w-5" />
+            <div className="mt-6 flex items-center justify-center gap-3 text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/50 p-4 rounded-lg animate-fade-in">
+              <AlertTriangle className="h-5 w-5 flex-shrink-0" />
               <p>{error}</p>
             </div>
           )}
@@ -76,7 +99,7 @@ const App: React.FC = () => {
           {isLoading && (
             <div className="mt-6 flex flex-col items-center justify-center text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 dark:border-violet-400"></div>
-              <p className="mt-4 text-slate-600 dark:text-slate-400">Extracting recipe, please wait...</p>
+              <p className="mt-4 text-slate-600 dark:text-slate-400">Cooking up some magic, please wait...</p>
             </div>
           )}
 
