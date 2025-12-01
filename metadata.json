@@ -1,0 +1,6 @@
+{
+  "name": "Recipe Extractor Pro",
+  "description": "A simple, colorful web app that takes a recipe URL, extracts the ingredients and instructions using AI, and allows users to save their favorite recipes.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
